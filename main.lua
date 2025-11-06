@@ -1,8 +1,8 @@
---// xAI ULTIMATE CHAOS MENU v6 - FLY GUI V3 + INFINITE YIELD + FULL CONTROL \\--
+--// xAI ULTIMATE CHAOS MENU v7 - NDS HUB + OCEAN THEME + SPECIFIC GAMES \\--
 -- 100% CLEAN | Synapse X / Krnl / Fluxus | 2025
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("xAI Chaos Pro v6", "Synapse")
+local Window = Library.CreateLib("xAI Chaos Pro v7", "Ocean")
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -24,20 +24,21 @@ local espConn = nil
 local trollingGui = nil
 local chatBypass = nil
 local infiniteYield = nil
+local ndsHub = nil
 local walkSpeed = 16
 local jumpPower = 50
 
---// NEW FLY: FlyGuiV3 (Button, not toggle)
+--// FLY GUI V3
 local function openFlyGui()
     if flyGui then
         game.StarterGui:SetCore("SendNotification", {Title="Fly GUI", Text="Already open!", Duration=3})
         return
     end
     flyGui = loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
-    game.StarterGui:SetCore("SendNotification", {Title="Fly GUI v3 Loaded", Text="Use GUI to fly | Close to disable", Duration=5})
+    game.StarterGui:SetCore("SendNotification", {Title="Fly GUI v3 Loaded", Text="Use GUI to fly", Duration=5})
 end
 
---// INFINITE JUMP + FULL TERMINATION
+--// INFINITE JUMP
 local function toggleInfJump(state)
     if state then
         if infJumpConn then infJumpConn:Disconnect() end
@@ -56,7 +57,7 @@ local function toggleInfJump(state)
     end
 end
 
---// JERK OFF LOOP + FULL TERMINATION
+--// JERK OFF LOOP
 local function startJerkLoop()
     if jerkLoop then return end
     local char = lp.Character or lp.CharacterAdded:Wait()
@@ -90,7 +91,7 @@ local function stopJerkLoop()
     if jerkAnim then jerkAnim:Destroy() jerkAnim = nil end
 end
 
---// ESP + FULL TERMINATION
+--// ESP
 local function toggleESP(state)
     if state then
         espConn = Players.PlayerAdded:Connect(function(plr)
@@ -171,6 +172,16 @@ local function loadInfiniteYield()
     game.StarterGui:SetCore("SendNotification", {Title="Infinite Yield Loaded", Text="Credits in 3 dots!", Duration=5})
 end
 
+--// NDS HUB (Specific Game)
+local function loadNDSHub()
+    if ndsHub then
+        game.StarterGui:SetCore("SendNotification", {Title="NDS Hub", Text="Already loaded!", Duration=3})
+        return
+    end
+    ndsHub = loadstring(game:HttpGet("https://raw.githubusercontent.com/KaterHub-Inc/NaturalDisasterSurvival/refs/heads/main/main.lua"))()
+    game.StarterGui:SetCore("SendNotification", {Title="NDS Hub Loaded", Text="Dominate disasters!", Duration=5})
+end
+
 --// PLAYER STATS
 local function updateWalkSpeed(val)
     walkSpeed = val
@@ -220,6 +231,16 @@ GUISection:NewButton("Infinite Yield", "Admin Commands\nCredits in 3 dots", func
     loadInfiniteYield()
 end)
 
+--// SPECIFIC GAMES CATEGORY
+local SpecificGamesSection = GUITab:NewSection("Specific Games")
+
+--// NATURAL DISASTER SURVIVAL SUBCATEGORY
+local NDSSection = GUITab:NewSection("Natural Disaster Survival")
+
+NDSSection:NewButton("NDS Hub", "Credits to w2pr on ScriptBlox", function()
+    loadNDSHub()
+end)
+
 local PlayerTab = Window:NewTab("Player")
 local PlayerSection = PlayerTab:NewSection("Stats")
 
@@ -251,7 +272,7 @@ end)
 
 --// LOADED
 game.StarterGui:SetCore("SendNotification", {
-    Title = "xAI Chaos Pro v6 LOADED",
-    Text = "Fly GUI v3 | Infinite Yield | Press F",
+    Title = "xAI Chaos Pro v7 LOADED",
+    Text = "Ocean Theme | NDS Hub | Hover for credits | Press F",
     Duration = 8
 })
