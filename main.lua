@@ -1,4 +1,4 @@
---// xAI ULTIMATE CHAOS MENU v7 - KEY SYSTEM + FREE MODE + ORCA HUB \\--
+--// xAI ULTIMATE CHAOS MENU v7 - KEY SYSTEM + FREE MODE + ORCA HUB + BLUE LINES ESP \\--
 -- ONE FILE: https://raw.githubusercontent.com/maplespicysauce/RobloxChaosMenu/main/main.lua
 
 --// HARD-CODED KEY (PRO ONLY)
@@ -147,6 +147,7 @@ function LoadFullMenu(isPro)
     local Window = Library.CreateLib("xAI Chaos v7" .. (isPro and " Pro 🔑" or " Free 🆓"), "Ocean")
 
     local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
     local UserInputService = game:GetService("UserInputService")
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
     local lp = Players.LocalPlayer
@@ -155,8 +156,7 @@ function LoadFullMenu(isPro)
     local rootPart = character:WaitForChild("HumanoidRootPart")
 
     local flyGui, infJumpConn, jerkLoop, jerkAnim, jerkTrack = nil, nil, nil, nil, nil
-    local espBoxes, espConn = {}, nil
-    local trollingGui, chatBypass, infiniteYield, ndsHub, orcaHub = nil, nil, nil, nil, nil
+    local espBoxes, espConn, espLines, espNames, espDistances = {}, nil, {}, {}, {}
     local walkSpeed, jumpPower = 16, 50
 
     --// FLY
@@ -214,37 +214,157 @@ function LoadFullMenu(isPro)
         if jerkAnim then jerkAnim:Destroy() jerkAnim = nil end
     end
 
-    --// ESP
+    --// ESP WITH BLUE LINES, NAME, DISTANCE
+    local function createLine()
+        local line = Drawing.new("Line")
+        line.Visible = false
+        line.Color = Color3.fromRGB(0, 120, 255)
+        line.Thickness = 2
+        line.Transparency = 1
+        return line
+    end
+
+    local function createText()
+        local text = Drawing.new("Text")
+        text.Visible = false
+        text.Color = Color3.fromRGB(0, 170, 255)
+        text.Size = 16
+        text.Center = true
+        text.Outline = true
+        text.Font = 2
+        return text
+    end
+
     local function toggleESP(state)
         if state then
             espConn = Players.PlayerAdded:Connect(function(plr)
                 if plr == lp then return end
-                plr.CharacterAdded:Wait()
-                local box = Instance.new("BoxHandleAdornment")
-                box.Adornee = plr.Character
-                box.Size = plr.Character:GetExtentsSize() + Vector3.new(0.5,0.5,0.5)
-                box.Color3 = Color3.fromRGB(255,0,0)
-                box.Transparency = 0.7
-                box.AlwaysOnTop = true
-                box.Parent = plr.Character
-                table.insert(espBoxes, box)
-            end)
-            for _, plr in Players:GetPlayers() do
-                if plr ~= lp and plr.Character then
+                plr.CharacterAdded:Connect(function(char)
+                    local torso = char:WaitForChild("UpperTorso", 5) or char:FindFirstChild("Torso")
+                    if not torso then return end
+
                     local box = Instance.new("BoxHandleAdornment")
-                    box.Adornee = plr.Character
-                    box.Size = plr.Character:GetExtentsSize() + Vector3.new(0.5,0.5,0.5)
-                    box.Color3 = Color3.fromRGB(255,0,0)
+                    box.Adornee = char
+                    box.Size = char:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
+                    box.Color3 = Color3.fromRGB(255, 0, 0)
                     box.Transparency = 0.7
                     box.AlwaysOnTop = true
-                    box.Parent = plr.Character
+                    box.ZIndex = 10
+                    box.Parent = char
                     table.insert(espBoxes, box)
+
+                    local line = createLine()
+                    local nameText = createText()
+                    local distText = createText()
+                    table.insert(espLines, {plr = plr, line = line})
+                    table.insert(espNames, {plr = plr, text = nameText})
+                    table.insert(espDistances, {plr = plr, text = distText})
+                end)
+            end)
+
+            for _, plr in Players:GetPlayers() do
+                if plr ~= lp and plr.Character then
+                    local char = plr.Character
+                    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                    if not torso then continue end
+
+                    local box = Instance.new("BoxHandleAdornment")
+                    box.Adornee = char
+                    box.Size = char:GetExtentsSize() + Vector3.new(0.5, 0.5, 0.5)
+                    box.Color3 = Color3.fromRGB(255, 0, 0)
+                    box.Transparency = 0.7
+                    box.AlwaysOnTop = true
+                    box.ZIndex = 10
+                    box.Parent = char
+                    table.insert(espBoxes, box)
+
+                    local line = createLine()
+                    local nameText = createText()
+                    local distText = createText()
+                    table.insert(espLines, {plr = plr, line = line})
+                    table.insert(espNames, {plr = plr, text = nameText})
+                    table.insert(espDistances, {plr = plr, text = distText})
                 end
             end
+
+            -- Render loop
+            espRender = RunService.RenderStepped:Connect(function()
+                local myTorso = lp.Character and (lp.Character:FindFirstChild("UpperTorso") or lp.Character:FindFirstChild("Torso"))
+                if not myTorso then return end
+                local cam = workspace.CurrentCamera
+                local myPos = myTorso.Position
+
+                for _, data in espLines do
+                    local plr = data.plr
+                    local line = data.line
+                    local char = plr.Character
+                    if char then
+                        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                        if torso then
+                            local screen1, onScreen1 = cam:WorldToViewportPoint(myPos)
+                            local screen2, onScreen2 = cam:WorldToViewportPoint(torso.Position)
+                            if onScreen1 and onScreen2 then
+                                line.From = Vector2.new(screen1.X, screen1.Y)
+                                line.To = Vector2.new(screen2.X, screen2.Y)
+                                line.Visible = true
+                            else
+                                line.Visible = false
+                            end
+                        end
+                    end
+                end
+
+                for _, data in espNames do
+                    local plr = data.plr
+                    local text = data.text
+                    local char = plr.Character
+                    if char then
+                        local head = char:FindFirstChild("Head")
+                        if head then
+                            local screen, onScreen = cam:WorldToViewportPoint(head.Position + Vector3.new(0, 2.5, 0))
+                            if onScreen then
+                                text.Text = plr.DisplayName or plr.Name
+                                text.Position = Vector2.new(screen.X, screen.Y)
+                                text.Visible = true
+                            else
+                                text.Visible = false
+                            end
+                        end
+                    end
+                end
+
+                for _, data in espDistances do
+                    local plr = data.plr
+                    local text = data.text
+                    local char = plr.Character
+                    if char then
+                        local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                        if torso then
+                            local dist = (myPos - torso.Position).Magnitude
+                            local screen, onScreen = cam:WorldToViewportPoint(torso.Position + Vector3.new(0, 1, 0))
+                            if onScreen then
+                                text.Text = math.floor(dist) .. " studs"
+                                text.Position = Vector2.new(screen.X, screen.Y)
+                                text.Visible = true
+                            else
+                                text.Visible = false
+                            end
+                        end
+                    end
+                end
+            end)
         else
-            for _, b in espBoxes do if b and b.Parent then b:Destroy() end end
+            -- Cleanup
+            for _, box in espBoxes do if box and box.Parent then box:Destroy() end end
             espBoxes = {}
+            for _, data in espLines do if data.line then data.line:Remove() end end
+            espLines = {}
+            for _, data in espNames do if data.text then data.text:Remove() end end
+            espNames = {}
+            for _, data in espDistances do if data.text then data.text:Remove() end end
+            espDistances = {}
             if espConn then espConn:Disconnect() espConn = nil end
+            if espRender then espRender:Disconnect() espRender = nil end
         end
     end
 
@@ -318,7 +438,7 @@ function LoadFullMenu(isPro)
     else
         VisualSec:NewLabel("Jerk Off LOOP 💦 - Pro Only")
     end
-    VisualSec:NewToggle("Player ESP", false, toggleESP)
+    VisualSec:NewToggle("Player ESP (Lines + Name + Distance)", false, toggleESP)
 
     local GUITab = Window:NewTab("GUIs")
     local ExtSec = GUITab:NewSection("External GUIs")
